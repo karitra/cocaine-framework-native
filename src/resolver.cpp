@@ -115,6 +115,7 @@ auto resolver_t::resolve(std::string name) -> task<resolver_t::result_t>::future
     CF_CTX("R");
 
     auto locator = std::make_shared<framework::session_t>(scheduler);
+    locator->hard_shutdown(true);
 
     CF_DBG(">> connecting to the locator ...");
     return locator->connect(endpoints())
