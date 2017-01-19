@@ -1,3 +1,9 @@
+cocaine-framework-native (0.12.11-3) unstable; urgency=low
+
+  * Fixed: shutdown inner locator hardly.
+
+ -- Evgeny Safronov <division494@gmail.com>  Thu, 19 Jan 2017 18:33:51 +0300
+
 cocaine-framework-native (0.12.11-2) unstable; urgency=low
 
   * Fixed: make the code compilable again due to fixing prevent name
