@@ -72,6 +72,8 @@ public:
     event_loop_t event_loop;
     scheduler_t scheduler;
 
+    service_manager_t::shutdown_policy_t shutdown_policy;
+
     std::vector<session_t::endpoint_type> locations;
 
     std::vector<boost::thread> threads;
@@ -82,6 +84,7 @@ public:
         work(boost::optional<loop_t::work>(loop_t::work(io))),
         event_loop(io),
         scheduler(event_loop),
+        shutdown_policy(service_manager_t::shutdown_policy_t::graceful),
         locations(std::move(locations_)),
         logger(std::make_shared<service<io::log_tag>>(internal_logger_t(), "logging", locations, scheduler))
     {}
@@ -151,6 +154,10 @@ service_manager_t::~service_manager_t() {
 
     d->work.reset();
 
+    if (d->shutdown_policy == shutdown_policy_t::force) {
+        d->io.stop();
+    }
+
     for (auto& thread : d->threads) {
         thread.join();
     }
@@ -180,4 +187,14 @@ service_manager_t::next() {
 std::shared_ptr<service<io::log_tag>>
 service_manager_t::logger() const {
     return d->logger;
+}
+
+service_manager_t::shutdown_policy_t
+service_manager_t::shutdown_policy() const {
+    return d->shutdown_policy;
+}
+
+void
+service_manager_t::shutdown_policy(shutdown_policy_t policy) {
+    d->shutdown_policy = policy;
 }
