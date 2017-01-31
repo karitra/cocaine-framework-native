@@ -1,3 +1,10 @@
+cocaine-framework-native (0.12.10-3) unstable; urgency=low
+
+  * Feature: allow service manager to terminate the I/O loop on
+    destruction without blocking.
+
+ -- Evgeny Safronov <division494@gmail.com>  Tue, 31 Jan 2017 10:16:59 +0300
+
 cocaine-framework-native (0.12.10-2) unstable; urgency=low
 
   * Fixed: prevent infinite waiting for operations completion by
