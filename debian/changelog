@@ -1,3 +1,10 @@
+cocaine-framework-native (0.12.11-4) unstable; urgency=low
+
+  * Feature: allow service manager to terminate the I/O loop on
+    destruction without blocking.
+
+ -- Evgeny Safronov <division494@gmail.com>  Tue, 31 Jan 2017 10:21:10 +0300
+
 cocaine-framework-native (0.12.11-3) unstable; urgency=low
 
   * Fixed: shutdown inner locator hardly.
