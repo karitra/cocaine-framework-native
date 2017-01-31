@@ -34,6 +34,11 @@ class service_manager_t {
 public:
     typedef session_t::endpoint_type endpoint_type;
 
+    enum class shutdown_policy_t {
+        graceful,
+        force
+    };
+
 private:
     std::unique_ptr<service_manager_data> d;
 
@@ -69,6 +74,17 @@ public:
     /// Returns a shared pointer to the associated logger service.
     std::shared_ptr<service<io::log_tag>>
     logger() const;
+
+    shutdown_policy_t
+    shutdown_policy() const;
+
+    /// Sets the shutdown policy.
+    ///
+    /// Shutdown policies describe the way how this service manager will be destroyed. By default
+    /// the destructor will block until all outstanding asynchronous operations complete. This can
+    /// be changed using `shutdown_policy_t::force` flag.
+    void
+    shutdown_policy(shutdown_policy_t policy);
 
 private:
     void
