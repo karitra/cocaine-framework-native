@@ -23,6 +23,8 @@
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
 
+#include <msgpack.hpp>
+
 #include <cocaine/hpack/header.hpp>
 
 namespace msgpack { struct object; }
@@ -44,7 +46,10 @@ public:
     ///
     /// \pre object should represent valid MessagePack'ed Cocaine message, otherwise the behavior is
     /// undefined.
+    __attribute__((deprecated("use overload with zone instead")))
     decoded_message(msgpack::object, std::vector<char>&& storage, std::vector<hpack::header_t> headers);
+
+    decoded_message(msgpack::object, std::unique_ptr<msgpack::zone> zone, std::vector<char> storage, std::vector<hpack::header_t> headers);
 
     ~decoded_message();
 

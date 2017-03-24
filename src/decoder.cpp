@@ -40,7 +40,8 @@ size_t decoder_t::decode(const char* data, size_t size, message_type& message, s
     msgpack::object object;
     std::vector<char> buffer(size);
     memcpy(buffer.data(), data, size);
-    msgpack::unpack_return rv = msgpack::unpack(buffer.data(), size, &offset, &zone, &object);
+    std::unique_ptr<msgpack::zone> zone(new msgpack::zone{});
+    msgpack::unpack_return rv = msgpack::unpack(buffer.data(), size, &offset, &*zone, &object);
 
     if(rv == msgpack::UNPACK_SUCCESS || rv == msgpack::UNPACK_EXTRA_BYTES) {
         std::vector<hpack::header_t> headers;
@@ -57,7 +58,7 @@ size_t decoder_t::decode(const char* data, size_t size, message_type& message, s
         if(error) {
             ec = error::frame_format_error;
         }
-        message = message_type(std::move(object), std::move(buffer), std::move(headers));
+        message = message_type(std::move(object), std::move(zone), std::move(buffer), std::move(headers));
     } else if(rv == msgpack::UNPACK_CONTINUE) {
         ec = error::insufficient_bytes;
     } else if(rv == msgpack::UNPACK_PARSE_ERROR) {

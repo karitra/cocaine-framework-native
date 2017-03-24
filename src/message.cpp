@@ -33,13 +33,15 @@ class decoded_message::inner_t {
 public:
     inner_t() {}
 
-    inner_t(msgpack::object _obj, std::vector<char>&& _storage, hpack::header_storage_t _headers) :
+    inner_t(msgpack::object _obj, std::unique_ptr<msgpack::zone> zone, std::vector<char>&& _storage, hpack::header_storage_t _headers) :
         obj(std::move(_obj)),
+        zone(std::move(zone)),
         storage(std::move(_storage)),
         headers(std::move(_headers))
     {}
 
     msgpack::object obj;
+    std::unique_ptr<msgpack::zone> zone;
     std::vector<char> storage;
     hpack::header_storage_t headers;
 };
@@ -49,7 +51,11 @@ decoded_message::decoded_message(boost::none_t) :
 {}
 
 decoded_message::decoded_message(msgpack::object obj, std::vector<char>&& storage, std::vector<hpack::header_t> headers) :
-    d(new inner_t(std::move(obj), std::move(storage), std::move(headers)))
+    d(new inner_t(std::move(obj), std::unique_ptr<msgpack::zone>(new msgpack::zone{}), std::move(storage), std::move(headers)))
+{}
+
+decoded_message::decoded_message(msgpack::object obj, std::unique_ptr<msgpack::zone> zone, std::vector<char> storage, std::vector<hpack::header_t> headers) :
+    d(new inner_t(std::move(obj), std::move(zone), std::move(storage), std::move(headers)))
 {}
 
 decoded_message::~decoded_message() = default;

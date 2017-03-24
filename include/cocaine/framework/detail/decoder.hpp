@@ -23,7 +23,6 @@
 
 #include <msgpack.hpp>
 
-#include <msgpack.hpp>
 namespace cocaine { namespace framework {
 
 class decoded_message;
@@ -37,7 +36,6 @@ namespace detail {
 struct decoder_t {
     typedef decoded_message message_type;
     hpack::header_table_t header_table;
-    msgpack::zone zone;
 
     size_t decode(const char* data, size_t size, message_type& message, std::error_code& ec);
 };
