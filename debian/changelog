@@ -1,3 +1,10 @@
+cocaine-framework-native (0.12.12-2) unstable; urgency=low
+
+  * Fixed: framework should no longer leaking memory during message
+    unpacking.
+
+ -- Evgeny Safronov <division494@gmail.com>  Fri, 24 Mar 2017 14:35:00 +0300
+
 cocaine-framework-native (0.12.12-1) unstable; urgency=low
 
   * Adapt with cocaine-core v0.12.12.
