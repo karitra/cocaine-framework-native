@@ -1,3 +1,11 @@
+cocaine-framework-native (0.12.13-1) unstable; urgency=low
+
+  * Changed: use map for slots instead of array
+    It helps to avoid gigabytes of allocations during startup with our new
+    protocol extension’s large type ids.
+
+ -- Evgeny Safronov <division494@gmail.com>  Thu, 30 Mar 2017 17:11:10 +0300
+
 cocaine-framework-native (0.12.12-2) unstable; urgency=low
 
   * Fixed: framework should no longer leaking memory during message
