@@ -71,7 +71,7 @@ private:
     typedef typename detail::result_of<receiver<T, session_type>>::type result_type;
     typedef std::function<result_type(std::shared_ptr<basic_receiver_t<session_type>>, const msgpack::object&)> unpacker_type;
 
-    static const std::array<unpacker_type, boost::mpl::size<typename result_type::types>::value> unpackers;
+    static const std::unordered_map<std::uint64_t, unpacker_type> unpackers;
 
     std::shared_ptr<basic_receiver_t<session_type>> d;
 
@@ -135,11 +135,13 @@ private:
         const auto message = future.get();
         const auto id = message.type();
 
-        if (id >= unpackers.size()) {
+        auto it = unpackers.find(id);
+
+        if (it == std::end(unpackers)) {
             throw std::runtime_error("invalid protocol");
         }
 
-        auto result = unpackers[id](std::move(d), message.args());
+        auto result = it->second(std::move(d), message.args());
         return from_receiver<T, Session>::transform(result);
     }
 };
@@ -168,7 +170,7 @@ public:
 private:
     typedef typename detail::variant_of<tag_type>::type result_type;
     typedef std::function<result_type(const msgpack::object&)> unpacker_type;
-    typedef std::array<unpacker_type, boost::mpl::size<typename result_type::types>::value> unpackers_type;
+    typedef std::unordered_map<std::uint64_t, unpacker_type> unpackers_type;
 
     static const unpackers_type unpackers;
 
@@ -206,11 +208,13 @@ private:
         const auto message = future.get();
         const auto id = message.type();
 
-        if (id >= unpackers.size()) {
+        auto it = unpackers.find(id);
+
+        if (it == std::end(unpackers)) {
             throw std::runtime_error("invalid protocol");
         }
 
-        auto payload = unpackers[id](message.args());
+        auto payload = it->second(message.args());
         return from_receiver<tag_type, Session>::transform(payload);
     }
 };
@@ -230,21 +234,21 @@ public:
 
 // Static unpackers variables initialization.
 template<class T, class Session>
-const std::array<
-    typename receiver<T, Session>::unpacker_type,
-    boost::mpl::size<typename receiver<T, Session>::result_type::types>::value
+const std::unordered_map<
+    std::uint64_t,
+    typename receiver<T, Session>::unpacker_type
 > receiver<T, Session>::unpackers =
-    detail::to_array<
+    detail::to_map<
         typename receiver<T, Session>::result_type::types,
         detail::unpacker_factory<Session, typename receiver<T, Session>::unpacker_type>
     >::make();
 
 template<class T, class Session>
-const std::array<
-    typename receiver<io::streaming_tag<T>, Session>::unpacker_type,
-    boost::mpl::size<typename receiver<io::streaming_tag<T>, Session>::result_type::types>::value
+const std::unordered_map<
+    std::uint64_t,
+    typename receiver<io::streaming_tag<T>, Session>::unpacker_type
 > receiver<io::streaming_tag<T>, Session>::unpackers =
-    detail::to_array<
+    detail::to_map<
         typename receiver<io::streaming_tag<T>, Session>::result_type::types,
         detail::unpacker_factory<Session, typename receiver<io::streaming_tag<T>, Session>::unpacker_type>
     >::make();

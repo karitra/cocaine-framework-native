@@ -19,6 +19,7 @@
 #include <array>
 #include <cstdint>
 #include <tuple>
+#include <unordered_map>
 
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/front.hpp>
@@ -41,16 +42,16 @@ namespace cocaine { namespace framework {
 
 namespace detail {
 
-/// Transforms a typelist sequence into an array using the given metafunction.
+/// Transforms a typelist sequence into an unordered map using the given metafunction.
 ///
 /// \internal
 template<class Sequence, class F>
-struct to_array {
+struct to_map {
     typedef Sequence sequence_type;
     typedef typename F::result_type value_type;
     static constexpr std::size_t size = boost::mpl::size<sequence_type>::value;
 
-    typedef std::array<value_type, size> result_type;
+    typedef std::unordered_map<std::uint64_t, value_type> result_type;
 
 private:
     template<class IndexSequence>
@@ -62,8 +63,9 @@ private:
         result_type
         apply() {
             return result_type {{
-                F::template apply<typename boost::mpl::at<sequence_type, boost::mpl::int_<Index>>::type>()...
-            }};
+                Index,
+                F::template apply<typename boost::mpl::at<sequence_type, boost::mpl::int_<Index>>::type>()
+            }...};
         }
     };
 
