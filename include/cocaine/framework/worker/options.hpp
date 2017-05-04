@@ -25,7 +25,19 @@ namespace cocaine {
 
 namespace framework {
 
+namespace details {
+    constexpr auto DEFAULT_TOKEN_TYPE = "TVM";
+}
+
 struct options_t {
+    // taken from environment variables
+    std::string token_type;
+    std::string token_body;
+
+    // set to defaults currently
+    std::string tokens_service_name;
+    std::uint64_t refresh_ticket_interval_sec;
+
     std::string name;
     std::string uuid;
     std::string endpoint;

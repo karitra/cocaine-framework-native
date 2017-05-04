@@ -30,6 +30,7 @@
 #include "cocaine/framework/forwards.hpp"
 #include "cocaine/framework/manager.hpp"
 #include "cocaine/framework/scheduler.hpp"
+#include "cocaine/framework/tokman.hpp"
 
 #include "cocaine/framework/detail/log.hpp"
 #include "cocaine/framework/detail/loop.hpp"
@@ -72,15 +73,17 @@ public:
 
     /// Service manager, for user purposes.
     service_manager_t manager;
+    std::shared_ptr<token_manager_t> token_manager;
 
     std::shared_ptr<worker_session_t> session;
 
-    impl(options_t options, std::vector<session_t::endpoint_type> entries) :
+    impl(options_t options, std::vector<session_t::endpoint_type> entries):
         loop(io),
         scheduler(loop),
         options(std::move(options)),
         executor(),
-        manager(std::move(entries), 1)
+        manager(std::move(entries), 1),
+        token_manager(token_manager_t::make(io, manager, options))
     {}
 };
 
@@ -161,4 +164,8 @@ int worker_t::run() {
     }
 
     return 0;
+}
+
+auto worker_t::token() const -> token_t {
+    return d->token_manager->token();
 }

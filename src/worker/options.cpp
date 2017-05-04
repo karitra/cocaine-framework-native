@@ -23,6 +23,18 @@
 
 using namespace cocaine::framework;
 
+namespace cocaine { namespace framework { namespace details {
+    constexpr auto DEFAULT_TOKENS_SRV_NAME = "tvm";
+    constexpr auto DEFAULT_REFRESH_INTERVAL_SEC = 15;
+
+    constexpr auto DEFAULT_TOKEN_BODY = "very_secret";
+
+    constexpr auto DEFAULT_ENV_TOKEN_TYPE = "COCAINE_APP_TOKEN_TYPE";
+    constexpr auto DEFAULT_ENV_TOKEN_BODY = "COCAINE_APP_TOKEN_BODY";
+}
+}
+}
+
 namespace {
 
 void help(const char* program, const boost::program_options::options_description& description) {
@@ -35,7 +47,12 @@ void help(const char* program, const boost::program_options::options_description
 
 } // namespace
 
-options_t::options_t(int argc, char** argv) {
+options_t::options_t(int argc, char** argv) :
+    token_type(details::DEFAULT_TOKEN_TYPE),
+    token_body(details::DEFAULT_TOKEN_BODY),
+    tokens_service_name(details::DEFAULT_TOKENS_SRV_NAME),
+    refresh_ticket_interval_sec(details::DEFAULT_REFRESH_INTERVAL_SEC)
+{
     boost::program_options::options_description options("Configuration");
     options.add_options()
         ("app",      boost::program_options::value<std::string>(),   "application name")
@@ -95,6 +112,16 @@ options_t::options_t(int argc, char** argv) {
     locator  = vm["locator"].as<std::string>();
 
     other["protocol"] = protocol;
+
+    char *env_val = nullptr;
+
+    if ((env_val = std::getenv(details::DEFAULT_ENV_TOKEN_TYPE)) != nullptr) {
+        token_type = env_val;
+    }
+
+    if ((env_val = std::getenv(details::DEFAULT_ENV_TOKEN_BODY)) != nullptr) {
+        token_body = env_val;
+    }
 }
 
 std::uint32_t

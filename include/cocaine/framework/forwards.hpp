@@ -76,5 +76,7 @@ namespace cocaine {
         struct options_t;
         class dispatch_t;
         class worker_t;
+
+        class token_t;
     } // namespace framework
 } // namespace cocaine
