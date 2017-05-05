@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cocaine/framework/idl/tvm.hpp>
-
 #include "cocaine/framework/detail/forwards.hpp"
 #include "cocaine/framework/forwards.hpp"
 #include "cocaine/framework/service.hpp"
@@ -38,7 +36,10 @@ protected:
 };
 
 class null_token_manager_t final : public token_manager_t {
+    token_t tok;
 public:
+    null_token_manager_t(options_t options);
+
     auto
     token() const -> token_t override;
 };

@@ -30,12 +30,13 @@
 #include "cocaine/framework/forwards.hpp"
 #include "cocaine/framework/manager.hpp"
 #include "cocaine/framework/scheduler.hpp"
-#include "cocaine/framework/tokman.hpp"
 
 #include "cocaine/framework/detail/log.hpp"
 #include "cocaine/framework/detail/loop.hpp"
 #include "cocaine/framework/detail/worker/executor.hpp"
 #include "cocaine/framework/detail/worker/session.hpp"
+
+#include "tokman.hpp"
 
 namespace ph = std::placeholders;
 
@@ -77,7 +78,7 @@ public:
 
     std::shared_ptr<worker_session_t> session;
 
-    impl(options_t options, std::vector<session_t::endpoint_type> entries):
+    impl(options_t options, std::vector<session_t::endpoint_type> entries) :
         loop(io),
         scheduler(loop),
         options(std::move(options)),

@@ -26,18 +26,13 @@ namespace cocaine {
 namespace framework {
 
 namespace details {
-    constexpr auto DEFAULT_TOKEN_TYPE = "TVM";
+    constexpr auto TVM_TOKEN_TYPE = "TVM";
+    constexpr auto NULL_TOKEN_TYPE = "null";
+
+    constexpr auto DEFAULT_TOKEN_TYPE = TVM_TOKEN_TYPE;
 }
 
 struct options_t {
-    // taken from environment variables
-    std::string token_type;
-    std::string token_body;
-
-    // set to defaults currently
-    std::string tokens_service_name;
-    std::uint64_t refresh_ticket_interval_sec;
-
     std::string name;
     std::string uuid;
     std::string endpoint;
@@ -53,6 +48,8 @@ struct options_t {
     std::uint32_t
     protocol() const;
 
+    const boost::any&
+    at(const std::string& name) const;
 private:
     std::unordered_map<std::string, boost::any> other;
 };

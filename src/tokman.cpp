@@ -1,21 +1,46 @@
+#include <memory>
+#include <utility>
 
 #include "cocaine/framework/detail/loop.hpp"
+#include "cocaine/framework/detail/log.hpp"
 
-#include "cocaine/framework/tokman.hpp"
 #include "cocaine/framework/service.hpp"
 #include "cocaine/framework/manager.hpp"
 #include "cocaine/framework/worker.hpp"
 
 #include <asio/deadline_timer.hpp>
 
-#include <memory>
-#include <utility>
+#include "idl/tvm.hpp"
+#include "tokman.hpp"
 
 namespace cocaine { namespace framework {
 
+namespace details {
+    auto
+    as_string(const options_t& options, const std::string& name) -> std::string
+    {
+        return boost::any_cast<std::string>(options.at(name));
+    }
+
+    auto
+    as_uint(const options_t& options, const std::string& name) -> unsigned
+    {
+        return boost::any_cast<unsigned>(options.at(name));
+    }
+}
+
 auto
 make_token(const options_t& options) -> token_t {
-    return token_t{ options.token_type, options.token_body};
+    return token_t{
+        details::as_string(options, "token_type"),
+        details::as_string(options, "token_body") };
+}
+
+auto
+make_null_token(const options_t& options) -> token_t {
+    return token_t{
+        details::as_string(options, "test_token_type"),
+        details::as_string(options, "test_token_body") };
 }
 
 struct tvm_token_manager_t::tvm_service_impl_t :
@@ -40,9 +65,9 @@ struct tvm_token_manager_t::tvm_service_impl_t :
 
     tvm_service_impl_t(detail::loop_t& loop, service_manager_t& manager, const options_t options) :
         application_name(options.name),
-        tokens_service(manager.create<tvm_service_tag>(options.tokens_service_name)),
+        tokens_service(manager.create<tvm_service_tag>(details::as_string(options, "tokens_service_name"))),
         refresh_timer(loop),
-        refresh_interval(options.refresh_ticket_interval_sec),
+        refresh_interval(details::as_uint(options, "refresh_ticket_interval_sec")),
         tok(make_token(options))
     {}
 
@@ -59,22 +84,22 @@ struct tvm_token_manager_t::tvm_service_impl_t :
         refresh_timer.expires_from_now(refresh_interval);
         refresh_timer.async_wait([self] (const std::error_code& ec) {
             if (ec) {
+                CF_DBG("refresh_ticket -> canceled");
                 // canceled
                 return;
             }
 
             // Note that as refresh_timer is bound to worker_t io loop,
             // all exception will be propagated to worker_t::run try/catch block
-            // TODO: any way to do async call (via collback/then chain)?
-            auto fresh_body = self->tokens_service.invoke<io::tvm::refresh_ticket>(
+            self->tokens_service.invoke<io::tvm::refresh_ticket>(
                 self->application_name,
                 self->tok.body
-            ).get();
+            ).then([self] (task<std::string>::future_move_type future) {
+                CF_DBG("refresh_ticket -> updating token");
 
-            {
                 std::lock_guard<std::mutex> lock(self->tok_mut);
-                self->tok.body = fresh_body;
-            }
+                self->tok.body = future.get();
+            });
 
             self->refresh_ticket_async();
         });
@@ -88,9 +113,13 @@ token_manager_t::make(detail::loop_t& io, service_manager_t& manager, const opti
     if (make_token(options).type == std::string(details::DEFAULT_TOKEN_TYPE)) {
         return std::make_shared<tvm_token_manager_t>(io, manager, options);
     } else {
-        return std::make_shared<null_token_manager_t>();
+        return std::make_shared<null_token_manager_t>(options);
     }
 }
+
+null_token_manager_t::null_token_manager_t(options_t options) :
+    tok(make_null_token(options))
+{}
 
 auto
 null_token_manager_t::token() const -> token_t {

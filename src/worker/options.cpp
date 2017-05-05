@@ -25,12 +25,13 @@ using namespace cocaine::framework;
 
 namespace cocaine { namespace framework { namespace details {
     constexpr auto DEFAULT_TOKENS_SRV_NAME = "tvm";
-    constexpr auto DEFAULT_REFRESH_INTERVAL_SEC = 15;
+    constexpr auto DEFAULT_REFRESH_INTERVAL_SEC = 15u;
 
     constexpr auto DEFAULT_TOKEN_BODY = "very_secret";
+    constexpr auto NULL_TOKEN_BODY = DEFAULT_TOKEN_BODY;
 
-    constexpr auto DEFAULT_ENV_TOKEN_TYPE = "COCAINE_APP_TOKEN_TYPE";
-    constexpr auto DEFAULT_ENV_TOKEN_BODY = "COCAINE_APP_TOKEN_BODY";
+    constexpr auto KEY_ENV_TOKEN_TYPE = "COCAINE_APP_TOKEN_TYPE";
+    constexpr auto KEY_ENV_TOKEN_BODY = "COCAINE_APP_TOKEN_BODY";
 }
 }
 }
@@ -47,11 +48,7 @@ void help(const char* program, const boost::program_options::options_description
 
 } // namespace
 
-options_t::options_t(int argc, char** argv) :
-    token_type(details::DEFAULT_TOKEN_TYPE),
-    token_body(details::DEFAULT_TOKEN_BODY),
-    tokens_service_name(details::DEFAULT_TOKENS_SRV_NAME),
-    refresh_ticket_interval_sec(details::DEFAULT_REFRESH_INTERVAL_SEC)
+options_t::options_t(int argc, char** argv)
 {
     boost::program_options::options_description options("Configuration");
     options.add_options()
@@ -113,18 +110,33 @@ options_t::options_t(int argc, char** argv) :
 
     other["protocol"] = protocol;
 
-    char *env_val = nullptr;
+    const char *env_val = nullptr;
 
-    if ((env_val = std::getenv(details::DEFAULT_ENV_TOKEN_TYPE)) != nullptr) {
-        token_type = env_val;
+    if ((env_val = std::getenv(details::KEY_ENV_TOKEN_TYPE)) != nullptr) {
+        other["token_type"] = std::string(env_val);
+    } else {
+        other["token_type"] = details::DEFAULT_TOKEN_TYPE;
     }
 
-    if ((env_val = std::getenv(details::DEFAULT_ENV_TOKEN_BODY)) != nullptr) {
-        token_body = env_val;
+    if ((env_val = std::getenv(details::KEY_ENV_TOKEN_BODY)) != nullptr) {
+        other["token_body"] = std::string(env_val);
+    } else {
+        other["token_body"] = details::DEFAULT_TOKEN_BODY;
     }
+
+    other["tokens_service_name"] = details::DEFAULT_TOKENS_SRV_NAME;
+    other["refresh_ticket_interval_sec"] = details::DEFAULT_REFRESH_INTERVAL_SEC;
+
+    other["test_token_type"] = details::NULL_TOKEN_TYPE;
+    other["test_token_body"] = details::NULL_TOKEN_BODY;
 }
 
 std::uint32_t
 options_t::protocol() const {
     return boost::any_cast<std::uint32_t>(other.at("protocol"));
+}
+
+const boost::any&
+options_t::at(const std::string& name) const {
+    return other.at(name);
 }
