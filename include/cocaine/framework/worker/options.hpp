@@ -25,13 +25,6 @@ namespace cocaine {
 
 namespace framework {
 
-namespace details {
-    constexpr auto TVM_TOKEN_TYPE = "TVM";
-    constexpr auto NULL_TOKEN_TYPE = "null";
-
-    constexpr auto DEFAULT_TOKEN_TYPE = TVM_TOKEN_TYPE;
-}
-
 struct options_t {
     std::string name;
     std::string uuid;

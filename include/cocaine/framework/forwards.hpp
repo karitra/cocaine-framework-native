@@ -77,6 +77,9 @@ namespace cocaine {
         class dispatch_t;
         class worker_t;
 
-        class token_t;
+        struct token_t {
+            std::string type;
+            std::string body;
+        };
     } // namespace framework
 } // namespace cocaine

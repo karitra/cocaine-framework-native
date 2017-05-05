@@ -11,14 +11,6 @@ namespace cocaine { namespace framework {
 
 class service_manager_t;
 
-struct token_t {
-    std::string type;
-    std::string body;
-};
-
-auto
-make_token(const options_t& options) -> token_t;
-
 struct token_manager_t {
     virtual ~token_manager_t() = default;
 
@@ -36,10 +28,7 @@ protected:
 };
 
 class null_token_manager_t final : public token_manager_t {
-    token_t tok;
 public:
-    null_token_manager_t(options_t options);
-
     auto
     token() const -> token_t override;
 };
@@ -48,7 +37,7 @@ class tvm_token_manager_t final : public token_manager_t {
     struct tvm_service_impl_t;
     std::shared_ptr<tvm_service_impl_t> d;
 public:
-    tvm_token_manager_t(detail::loop_t& io, service_manager_t& manager, options_t options);
+    tvm_token_manager_t(detail::loop_t& io, service_manager_t& manager, const options_t& options);
 
     auto
     token() const -> token_t override;

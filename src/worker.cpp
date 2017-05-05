@@ -83,9 +83,10 @@ public:
         scheduler(loop),
         options(std::move(options)),
         executor(),
-        manager(std::move(entries), 1),
-        token_manager(token_manager_t::make(io, manager, options))
-    {}
+        manager(std::move(entries), 1)
+    {
+        token_manager = token_manager_t::make(io, manager, this->options);
+    }
 };
 
 worker_t::worker_t(options_t options) {
