@@ -41,8 +41,11 @@ struct options_t {
     std::uint32_t
     protocol() const;
 
-    const boost::any&
-    at(const std::string& name) const;
+    std::string
+    token_type() const;
+
+    std::string
+    token_body() const;
 private:
     std::unordered_map<std::string, boost::any> other;
 };

@@ -20,28 +20,15 @@
 namespace cocaine { namespace framework {
 
 namespace details {
-    auto
-    as_string(const options_t& options, const std::string& name) -> std::string
-    {
-        return boost::any_cast<std::string>(options.at(name));
-    }
-
-    auto
-    as_uint(const options_t& options, const std::string& name) -> unsigned
-    {
-        try {
-            return boost::any_cast<unsigned>(options.at(name));
-        } catch(const boost::bad_any_cast& error) {
-            return boost::any_cast<int>(options.at(name));
-        }
-    }
+    constexpr auto DEFAULT_TOKENS_SRV_NAME = "tvm";
+    constexpr auto DEFAULT_REFRESH_INTERVAL_SEC = 15u;
 }
 
 auto
 make_token(const options_t& options) -> token_t {
     return token_t{
-        details::as_string(options, "token_type"),
-        details::as_string(options, "token_body") };
+        options.token_type(),
+        options.token_body() };
 }
 
 struct tvm_token_manager_t::tvm_service_impl_t :
@@ -61,9 +48,9 @@ struct tvm_token_manager_t::tvm_service_impl_t :
 
     tvm_service_impl_t(detail::loop_t& loop, service_manager_t& manager, const options_t options) :
         application_name(options.name),
-        tokens_service(manager.create<cocaine::io::tvm_tag>(details::as_string(options, "tokens_service_name"))),
+        tokens_service(manager.create<cocaine::io::tvm_tag>(details::DEFAULT_TOKENS_SRV_NAME)),
         refresh_timer(loop),
-        refresh_interval(details::as_uint(options, "refresh_ticket_interval_sec")),
+        refresh_interval(details::DEFAULT_REFRESH_INTERVAL_SEC),
         tok(make_token(options))
     {}
 
